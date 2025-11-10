@@ -1,48 +1,77 @@
-"""
-Database Schemas
+from datetime import datetime
+from typing import Optional, List
+from pydantic import BaseModel, Field, EmailStr
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
-"""
-
-from pydantic import BaseModel, Field
-from typing import Optional
-
-# Example schemas (replace with your own):
+# Each model corresponds to a MongoDB collection named by the class name lowercased
 
 class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    id: Optional[str] = Field(default=None, alias="_id")
+    email: EmailStr
+    name: str
+    xp: int = 0
+    streak: int = 0
+    last_checkin: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
 
-# Add your own schemas here:
-# --------------------------------------------------
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Course(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
+    user_id: str
+    title: str
+    code: Optional[str] = None
+    color: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        populate_by_name = True
+
+
+class Task(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
+    user_id: str
+    title: str
+    course_id: Optional[str] = None
+    due_date: Optional[datetime] = None
+    status: str = "pending"  # pending | completed
+    xp_value: Optional[int] = 10
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        populate_by_name = True
+
+
+class Mood(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
+    user_id: str
+    mood: str  # happy, neutral, tired, stressed, motivated
+    note: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        populate_by_name = True
+
+
+class Reply(BaseModel):
+    user_id: str
+    content: str
+    created_at: datetime
+
+
+class Post(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
+    user_id: str
+    title: str
+    content: str
+    replies: List[Reply] = []
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        populate_by_name = True
